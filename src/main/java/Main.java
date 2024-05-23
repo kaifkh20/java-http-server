@@ -30,6 +30,7 @@ public class Main {
       System.out.println(line);
 
       OutputStream os = clientSocket.getOutputStream();
+      System.out.println(request[1]);
       if (request[1].equals("/")) {
         os.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
       } else if(request[1].contains("/echo")){
