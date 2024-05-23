@@ -27,6 +27,7 @@ public class Main {
       InputStream is = clientSocket.getInputStream();
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
       
+      OutputStream os = clientSocket.getOutputStream();
       ArrayList<String[]> list= new ArrayList<>();
 
       // String str = "
@@ -66,7 +67,6 @@ public class Main {
       else {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
       }
-      OutputStream os = clientSocket.getOutputStream();
       
       os.write(message.getBytes());
       System.out.println("Response sent");
