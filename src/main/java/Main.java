@@ -56,13 +56,13 @@ public class Main {
           // System.err.println("reaching here");
           String word = list.get(0)[1].split("/")[2];
           // System.out.println(word);
-          message = ("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word);
+          message = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
       }
       else if(list.get(0)[1].equals("/user-agent")){
         String word = list.get(2)[1];
         // System.out.println("reching here");
         // System.out.println(word);
-        message = ("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word);
+        message = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
       }
       else {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
