@@ -35,8 +35,9 @@ public class Main {
         os.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
       } else if(request[1].contains("/echo")){
           System.err.println("reaching here");
-          String word = request[1].split("/")[1];
-          os.write(("HTTP/1.1 200 OK\r\n Content-Type: text/plain\r\n"+"Content-Length:"+ word.length() +"\r\n\r\n"+word).getBytes());
+          String word = request[1].split("/")[2];
+          // System.out.println(word);
+          os.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word).getBytes());
       }
       else {
         os.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
