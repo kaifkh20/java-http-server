@@ -32,7 +32,11 @@ public class Main {
       OutputStream os = clientSocket.getOutputStream();
       if (request[1].equals("/")) {
         os.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-      } else {
+      } else if(request[1].contains("/echo")){
+          String word = request[1].split("/")[1];
+          os.write(("HTTP/1.1 200 OK\r\n Content-Type: text/plain\r\n"+"Content-Length:"+ word.length() +"\r\n\r\n"+word).getBytes());
+      }
+      else {
         os.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
       }
       
