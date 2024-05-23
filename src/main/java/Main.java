@@ -3,8 +3,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Main {
   public static void main(String[] args) {
@@ -24,25 +26,51 @@ public class Main {
       
       InputStream is = clientSocket.getInputStream();
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
-      String line = br.readLine();
-      String []request = line.split(" ",0);
+      
+      ArrayList<String[]> list= new ArrayList<>();
 
-      System.out.println(line);
+      // String str = "
 
-      OutputStream os = clientSocket.getOutputStream();
-      System.out.println(request[1]);
-      if (request[1].equals("/")) {
-        os.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-      } else if(request[1].contains("/echo")){
-          System.err.println("reaching here");
-          String word = request[1].split("/")[2];
+      while(true){
+        String line = br.readLine();
+        if (line==null){
+          break;
+        }
+        String []request = line.split(" ",0);
+        list.add(request);
+      }
+
+      // for(String[] x:list){
+      //   for (String str : x) {
+      //     System.out.print(str+" ");
+      //   }System.out.println();
+      // }
+      // System.out.println(line);;
+
+      String message = "";
+      // System.out.println(request[1]);
+      if (list.get(0)[1].equals("/")) {
+        message = "HTTP/1.1 200 OK\r\n\r\n";
+      } else if(list.get(0)[1].contains("/echo")){
+          // System.err.println("reaching here");
+          String word = list.get(0)[1].split("/")[2];
           // System.out.println(word);
-          os.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word).getBytes());
+          message = ("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word);
+      }
+      else if(list.get(0)[1].equals("/user-agent")){
+        String word = list.get(2)[1];
+        // System.out.println("reching here");
+        // System.out.println(word);
+        message = ("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word);
       }
       else {
-        os.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+        message = "HTTP/1.1 404 Not Found\r\n\r\n";
       }
+      OutputStream os = clientSocket.getOutputStream();
       
+      os.write(message.getBytes());
+      System.out.println("Response sent");
+      os.flush();
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
     }
