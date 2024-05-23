@@ -34,6 +34,7 @@ public class Main {
       if (request[1].equals("/")) {
         os.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
       } else if(request[1].contains("/echo")){
+          System.err.println("reaching here");
           String word = request[1].split("/")[1];
           os.write(("HTTP/1.1 200 OK\r\n Content-Type: text/plain\r\n"+"Content-Length:"+ word.length() +"\r\n\r\n"+word).getBytes());
       }
