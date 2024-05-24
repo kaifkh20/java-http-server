@@ -10,30 +10,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class Main {
-  public static void main(String[] args) {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    System.out.println("Logs from your program will appear here!");
-
-    // Uncomment this block to pass the first stage
-    //
-    ServerSocket serverSocket = null;
-    Socket clientSocket = null;
-    
-    try {
-      serverSocket = new ServerSocket(4221);
-      serverSocket.setReuseAddress(true);
-      clientSocket = serverSocket.accept(); // Wait for connection from client.
-      System.out.println("accepted new connection");
-      
+class ThreadClient extends Thread{
+  private final Socket clientSocket;
+  public ThreadClient(Socket clSocket){
+    this.clientSocket = clSocket;
+  }
+  public void run(){
+    try{
       InputStream is = clientSocket.getInputStream();
+      String message = Main.performOperation(is);
+
+      OutputStream os = clientSocket.getOutputStream();
+      os.write(message.getBytes());
+      os.flush();
+        
+      // m.performOperation(i)
+    }catch(IOException e){
+      System.out.println("ERROR: "+e);
+    }
+  }
+}
+
+public class Main {
+  
+  static String performOperation(InputStream is) throws IOException{
+
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
-      
-      // ArrayList<String[]> list = new ArrayList<>();
 
-      // String firstLine = br.readLine();
-
-      // String path = firstLine.split(" ")[1];
 
       String line;
       HashMap<String,String> values = new HashMap<>();
@@ -49,14 +52,7 @@ public class Main {
       for (String key:values.keySet()){
         System.out.println(key+" "+values.get(key));
       }
-      // System.out.println("reaching out of loop");
-      // System.err.println(");
-      // for(String[] x:list){
-      //   for (String str : x) {
-      //     System.out.print(str+" ");
-      //   }System.out.println();
-      // }
-      // System.out.println();;
+
 
       String message = "";
 
@@ -80,12 +76,35 @@ public class Main {
       else {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
       }
-      OutputStream os = clientSocket.getOutputStream();
-      os.write(message.getBytes());
+
+      return message;
+      // OutputStream os = clientSocket.getOutputStream();
+      // os.write(message.getBytes());
       // System.out.println("Response sent"+message);
-      os.flush();
-    } catch (IOException e) {
-      System.out.println("IOException: " + e.getMessage());
-    }
+      // os.flush();
+  }
+  public static void main(String[] args) {
+    // You can use print statements as follows for debugging, they'll be visible when running tests.
+    System.out.println("Logs from your program will appear here!");
+
+
+      ServerSocket serverSocket = null;
+      Socket clientSocket = null;
+    
+      try {
+        serverSocket = new ServerSocket(4221);
+        serverSocket.setReuseAddress(true);
+        while (true) {
+          clientSocket = serverSocket.accept(); // Wait for connection from client.
+          ThreadClient th = new ThreadClient(clientSocket);
+          th.start();
+          System.out.println("accepted new connection");
+
+        }
+        
+        
+      } catch (IOException e) {
+        System.out.println("IOException: " + e.getMessage());
+      }
   }
 }
