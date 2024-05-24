@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,21 +46,31 @@ public class Main {
       HashMap<String,String> values = new HashMap<>();
 
       while((line = br.readLine()) != null && !line.isEmpty()){
-        // System.err.println(line);
+        System.err.println(line);
 
         String[] l = line.split(" ");
         values.put(l[0], l[1]);
         // sc.next();
       }
 
-      for (String key:values.keySet()){
-        System.out.println(key+" "+values.get(key));
-      }
+      // if(values.containsKey("POST")){
+      //   values.put("Body", br.readLine());
+      // }
+
+      System.out.println("REACHING HERE");
+      // for (String key:values.keySet()){
+      //   System.out.println(key+" "+values.get(key));
+      // }
 
 
       String message = "";
+      String path = "";
+      if(values.containsKey("GET")){
+        path = values.get("GET");
+      }else if(values.containsKey("POST")){
+        path = values.get("POST");
+      }
 
-      String path = values.get("GET");
       System.out.println(path);
       // System.out.println(request[1]);
       if (path.equals("/")) {
@@ -76,7 +87,7 @@ public class Main {
         // System.out.println(word);
         message = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
       }
-      else if(path.startsWith("/files")){
+      else if(path.startsWith("/files") && values.containsKey("GET") ){
         String word = path.split("/")[2];
         try{
           File file = new File(dirName+"/"+word);
@@ -92,6 +103,23 @@ public class Main {
           System.out.println("ERROR :"+e);
           message = "HTTP/1.1 404 Not Found\r\n\r\n";
         }  
+      }else if(path.startsWith("/files") && values.containsKey("POST")){
+        String word = path.split("/")[2];    
+        try{
+              File file = new File(dirName+"/"+word);
+              if(file.createNewFile()){
+                FileWriter fw = new FileWriter(file);
+                fw.write(values.get("Body"));
+                fw.close();
+              }else if(file.exists()){
+                FileWriter fw = new FileWriter(file);
+                fw.append(values.get("Body"));
+                fw.close();
+              }
+              message = "HTTP/1.1 201 OK\r\n\r\n";
+            }catch(IOException e){
+                System.out.println("ERROR :"+e);
+            }
       }
       else {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
