@@ -44,7 +44,7 @@ public class Main {
 
       String line;
       HashMap<String,String> values = new HashMap<>();
-
+      StringBuilder  sb = new StringBuilder();
       while((line = br.readLine()) != null && !line.isEmpty()){
         System.err.println(line);
 
@@ -52,6 +52,17 @@ public class Main {
         values.put(l[0], l[1]);
         // sc.next();
       }
+      
+      if(values.containsKey("POST")){
+
+      int c_l = Integer.parseInt(values.get("Content-Length:"));
+      while(c_l-->0){
+        int c = br.read();
+        sb.append((char)c);
+      }
+      values.put("Body", sb.toString());
+      }
+      
 
       // if(values.containsKey("POST")){
       //   values.put("Body", br.readLine());
@@ -107,7 +118,12 @@ public class Main {
         String word = path.split("/")[2];    
         try{
               File file = new File(dirName+"/"+word);
-              if(file.createNewFile()){
+              if(!file.exists()){
+                if(!file.getParentFile().exists()){
+                  System.out.println(file.getParent());
+                  file.getParentFile().createNewFile();
+                }
+                file.createNewFile();
                 FileWriter fw = new FileWriter(file);
                 fw.write(values.get("Body"));
                 fw.close();
@@ -116,7 +132,7 @@ public class Main {
                 fw.append(values.get("Body"));
                 fw.close();
               }
-              message = "HTTP/1.1 201 OK\r\n\r\n";
+              message = "HTTP/1.1 201 Created\r\n\r\n";
             }catch(IOException e){
                 System.out.println("ERROR :"+e);
             }
