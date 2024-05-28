@@ -8,9 +8,19 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.io.ByteArrayOutputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.*;
+
+class Response{
+  String message;
+  byte[] encoded_word;
+
+  public Response(String message,byte[]encoded_word){
+    this.message = message;
+    this.encoded_word = encoded_word;
+  }
+}
 
 class ThreadClient extends Thread{
   private final Socket clientSocket;
@@ -22,11 +32,20 @@ class ThreadClient extends Thread{
   public void run(){
     try{
       InputStream is = clientSocket.getInputStream();
-      String message = Main.performOperation(is,dirName);
+      Response message = Main.performOperation(is,dirName);
 
       OutputStream os = clientSocket.getOutputStream();
-      os.write(message.getBytes());
+
+      if(message.encoded_word!=null){
+        os.write(message.message.getBytes());
+        os.write(message.encoded_word);
+      }else{
+        os.write(message.message.getBytes());
+        // os.flush();
+      }
       os.flush();
+      os.close();
+
         
       // m.performOperation(i)
     }catch(IOException e){
@@ -36,8 +55,41 @@ class ThreadClient extends Thread{
 }
 
 public class Main {
+
+  // static String bytestoHex(byte[] bArray){
+  //   StringBuilder br = new StringBuilder();
+  //   for(byte b:bArray){
+  //       String hex = Integer.toHexString(0xff & b);
+  //       if(hex.length()==0){
+  //         br.append('0');
+  //       }
+  //       br.append(hex);
+  //   }
+  //   return br.toString();
+  // }
+
+  static byte[] compressString(String str){
+    if(str==null || str.length()==0){
+      return null;
+    }
+    try{
+      ByteArrayOutputStream byteArrayOs = new ByteArrayOutputStream();
+      GZIPOutputStream gzip = new GZIPOutputStream(byteArrayOs);
+      gzip.write(str.getBytes());
+      gzip.close();
+      byte[] barr =  byteArrayOs.toByteArray();
+      return barr;
+      // return byteArrayOs.toString();
+      // return Base64.getEncoder().encodeToString(barr);
+      // return bytestoHex(byteArrayOs.toByteArray());
+    }catch(IOException err){
+      System.out.println("ERROR: "+err);
+      // return str;
+    }
+    return null;
+  }
   
-  static String performOperation(InputStream is,String dirName) throws IOException{
+  static Response performOperation(InputStream is,String dirName) throws IOException{
 
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
@@ -107,7 +159,9 @@ public class Main {
           if(values.containsKey("Accept-Encoding:")){
             // System.out.println(values.get("Accept-Encoding:"));
             if(values.get("Accept-Encoding:").contains("gzip")){
-              message = "HTTP/1.1 200 OK\r\nContent-Encoding: "+"gzip"+"\r\n"+"Content-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
+              byte[] resp_word = compressString(word);
+              message = "HTTP/1.1 200 OK\r\nContent-Encoding: "+"gzip"+"\r\n"+"Content-Type: text/plain\r\nContent-Length: "+ resp_word.length +"\r\n\r\n";
+              return new Response(message, resp_word);
             }
           }          
 
@@ -164,7 +218,7 @@ public class Main {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
       }
       System.out.println(message);
-      return message;
+      return new Response(message, null);
       // OutputStream os = clientSocket.getOutputStream();
       // os.write(message.getBytes());
       // System.out.println("Response sent"+message);
