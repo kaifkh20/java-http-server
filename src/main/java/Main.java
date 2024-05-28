@@ -46,12 +46,20 @@ public class Main {
       HashMap<String,String> values = new HashMap<>();
       StringBuilder  sb = new StringBuilder();
       while((line = br.readLine()) != null && !line.isEmpty()){
-        System.err.println(line);
+        // System.err.println(line);
 
         String[] l = line.split(" ");
         values.put(l[0], l[1]);
+        // System.out.println(l[0]+" "+l[1]);
         // sc.next();
       }
+
+      // for(String x : values.keySet()){
+      //   if(x.equals("Accept-Encoding")){
+      //     System.out.println(true);
+      //   }
+      //   System.out.println(x+" "+values.get(x));
+      // }
       
       if(values.containsKey("POST")){
 
@@ -68,7 +76,7 @@ public class Main {
       //   values.put("Body", br.readLine());
       // }
 
-      System.out.println("REACHING HERE");
+      // System.out.println("REACHING HERE");
       // for (String key:values.keySet()){
       //   System.out.println(key+" "+values.get(key));
       // }
@@ -82,15 +90,25 @@ public class Main {
         path = values.get("POST");
       }
 
-      System.out.println(path);
+      // System.out.println(path);
       // System.out.println(request[1]);
       if (path.equals("/")) {
         message = "HTTP/1.1 200 OK\r\n\r\n";
       } else if(path.startsWith("/echo")){
           // System.err.println("reaching here");
           String word = path.split("/")[2];
-          // System.out.println(word);
           message = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
+
+          if(values.containsKey("Accept-Encoding:")){
+            // System.out.println(values.get("Accept-Encoding:"));
+            if(values.get("Accept-Encoding:").equals("gzip")){
+              message = "HTTP/1.1 200 OK\r\nContent-Encoding: "+values.get("Accept-Encoding:")+"\r\n"+"Content-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
+            }
+          }          
+
+
+
+          // System.out.println(word);
       }
       else if(path.startsWith("/user-agent")){
         String word = values.get("User-Agent:");
@@ -140,7 +158,7 @@ public class Main {
       else {
         message = "HTTP/1.1 404 Not Found\r\n\r\n";
       }
-
+      System.out.println(message);
       return message;
       // OutputStream os = clientSocket.getOutputStream();
       // os.write(message.getBytes());
