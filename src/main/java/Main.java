@@ -47,20 +47,23 @@ public class Main {
       StringBuilder  sb = new StringBuilder();
       while((line = br.readLine()) != null && !line.isEmpty()){
         // System.err.println(line);
-
+        StringBuilder sb_temp = new StringBuilder();
         String[] l = line.split(" ");
-        values.put(l[0], l[1]);
-        // System.out.println(l[0]+" "+l[1]);
+        for(int i=1;i<l.length;i++){
+          sb_temp.append(l[i]);
+        }
+        // System.out.println();
+        values.put(l[0],sb_temp.toString());        // System.out.println(l[0]+" "+l[1]);
         // sc.next();
       }
 
-      // for(String x : values.keySet()){
+      // for(String x : values.keySet()){clear
       //   if(x.equals("Accept-Encoding")){
       //     System.out.println(true);
       //   }
       //   System.out.println(x+" "+values.get(x));
       // }
-      
+      System.out.println(values.get("Accept-Encoding:"));
       if(values.containsKey("POST")){
 
       int c_l = Integer.parseInt(values.get("Content-Length:"));
@@ -70,7 +73,7 @@ public class Main {
       }
       values.put("Body", sb.toString());
       }
-      
+
 
       // if(values.containsKey("POST")){
       //   values.put("Body", br.readLine());
@@ -86,10 +89,12 @@ public class Main {
       String path = "";
       if(values.containsKey("GET")){
         path = values.get("GET");
+        
       }else if(values.containsKey("POST")){
         path = values.get("POST");
       }
-
+      path = path.split("H")[0];
+      System.out.println(path);
       // System.out.println(path);
       // System.out.println(request[1]);
       if (path.equals("/")) {
@@ -101,8 +106,8 @@ public class Main {
 
           if(values.containsKey("Accept-Encoding:")){
             // System.out.println(values.get("Accept-Encoding:"));
-            if(values.get("Accept-Encoding:").equals("gzip")){
-              message = "HTTP/1.1 200 OK\r\nContent-Encoding: "+values.get("Accept-Encoding:")+"\r\n"+"Content-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
+            if(values.get("Accept-Encoding:").contains("gzip")){
+              message = "HTTP/1.1 200 OK\r\nContent-Encoding: "+"gzip"+"\r\n"+"Content-Type: text/plain\r\nContent-Length: "+ word.length() +"\r\n\r\n"+word;
             }
           }          
 
